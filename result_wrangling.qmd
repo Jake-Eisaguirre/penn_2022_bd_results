@@ -1,0 +1,89 @@
+---
+title: "bd_result_wrangling"
+format: html
+editor: source
+---
+
+## Load Packages
+
+```{r}
+
+if(!require(librarian)){
+  install.packages(librarian)
+  library(librarian)
+}
+
+shelf(tidyverse, here, janitor, readxl, parsedate, stringr, lubridate)
+
+```
+
+## Loop for Read in
+```{r}
+files <- list.files(here("raw_data"))
+
+for (i in 1:length(files)) {
+  
+  
+  x <- read_excel(here("raw_data", files[i]), sheet = "Results", col_names = F) %>% 
+    slice(c(43:331)) %>% 
+    row_to_names(1) %>% 
+    clean_names()
+    
+  
+  assign(files[i], x)
+  
+  
+}
+
+
+qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls <- qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls %>% 
+  mutate(qpcr_date = as_date("2023-08-22"),
+         extraction_date = as_date("2023-07-28"))
+
+RIBBiTR_qPCR_Penn2022_21July2023_Plate1_RERUN_RESULTS.xls <- RIBBiTR_qPCR_Penn2022_21July2023_Plate1_RERUN_RESULTS.xls %>% 
+  mutate(qpcr_date = as_date("2023-09-05"),
+         extraction_date = as_date("2023-07-21"))
+
+RIBBiTR_qPCR_Penn2022_28July2023_Plate2_RBV_RESULTS.xls <- RIBBiTR_qPCR_Penn2022_28July2023_Plate2_RBV_RESULTS.xls %>% 
+    mutate(qpcr_date = as_date("2023-09-10"),
+           extraction_date = as_date("2023-07-28"))
+  
+  
+
+```
+
+## Wrangle Data
+```{r}
+
+qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_qPCR_Penn2022_28July2023_Plate2_RBV_RESULTS.xls,
+                   RIBBiTR_qPCR_Penn2022_21July2023_Plate1_RERUN_RESULTS.xls) %>% 
+  filter(target_name == 'Bd') %>% 
+  select(!c(y_intercept:tholdfail)) %>% 
+  select(!c(omit, target_name, task, reporter, quencher, well, ct, ct_sd, quantity, quantity_sd, well_position)) %>% 
+  rename(bd_swab_id = sample_name,
+         average_ct = ct_mean,
+         average_copy_number = quantity_mean) %>% 
+  mutate(extract_lab = "rz_lab",
+         qpcr_lab = "rz_lab",
+         standard = "pisces",
+         master_mix = "bioline",
+         qpcr_machine = "quantstudio_3",
+         extraction_kit = "qiagen_dneasy",
+         replicate = "singley",
+         result = if_else(!is.na(average_ct), "p", "n"),
+         swab_type = "mw113",
+         total_volume_uL = 200,
+         dillution_factor = "1:1",
+         volume_template_dna_uL = 5) %>% 
+  filter(!str_detect(bd_swab_id, "Pisces Bd/Bsal"),
+         !str_detect(bd_swab_id, "Positive"),
+         !str_detect(bd_swab_id, "Negative")) %>% 
+  mutate(bd_swab_id = if_else(bd_swab_id == "2022-05-05 Phelps pscr #11; skin tag on throat",
+                              "2022-05-05 Phelps pscr #11", bd_swab_id),
+         bd_swab_id = if_else(str_detect(bd_swab_id, "BdSwab"),
+                              str_replace(bd_swab_id, "BdSwab", "Pe_Bd"),
+                              bd_swab_id))
+
+
+```
+
