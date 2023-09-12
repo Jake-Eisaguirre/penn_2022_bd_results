@@ -1,0 +1,69 @@
+---
+title: "db_push"
+format: html
+editor: source
+---
+
+## Load Packages
+
+```{r}
+#| output: false
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+
+librarian::shelf(tidyverse, RPostgres, DBI, here)
+
+```
+
+
+## read in csv files
+```{r}
+files <- list.files(here("clean_tables"))
+
+for(i in 1:length(files)) {
+  
+  z <- read_csv(here("clean_tables", files[i]))
+  
+  assign(str_remove(files[i], ".csv"), z)
+  
+  
+}
+
+
+```
+
+
+## Connect to `survey_data` schema in `ribbitr` database
+```{r}
+#| output: false
+tryCatch({
+    drv <- dbDriver("Postgres")
+    print("Connecting to Database…")
+    connection <- dbConnect(drv,
+                 dbname = Sys.getenv("aws_dbname"),
+                 host = Sys.getenv("aws_host"),
+                 port = Sys.getenv("aws_port"),
+                 user = Sys.getenv("aws_user"),
+                 password = Sys.getenv("aws_password"),
+                 timezone=NULL)
+    print("Database Connected!")
+    },
+    error=function(cond) {
+            print("Unable to connect to Database.")
+    })
+
+#search path
+dbExecute(connection, "set search_path to survey_data")
+
+```
+
+## Push results to db
+```{r}
+
+dbWriteTable(connection, 'penn_22-23_bd_results', `penn_22-23_bd_results`, overwrite=T)
+
+
+```
+

@@ -85,5 +85,6 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
                               bd_swab_id))
 
 
+write_csv(qpcr_2022, here("clean_tables", "penn_22-23_bd_results.csv"))
 ```
 
