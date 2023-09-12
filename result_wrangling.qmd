@@ -77,12 +77,20 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
          volume_template_dna_uL = 5) %>% 
   filter(!str_detect(bd_swab_id, "Pisces Bd/Bsal"),
          !str_detect(bd_swab_id, "Positive"),
-         !str_detect(bd_swab_id, "Negative")) %>% 
+         !str_detect(bd_swab_id, "Negative"),
+         !str_detect(bd_swab_id, "neg"),
+         !str_detect(bd_swab_id, "Extract Control")) %>% 
   mutate(bd_swab_id = if_else(bd_swab_id == "2022-05-05 Phelps pscr #11; skin tag on throat",
                               "2022-05-05 Phelps pscr #11", bd_swab_id),
-         bd_swab_id = if_else(str_detect(bd_swab_id, "BdSwab"),
-                              str_replace(bd_swab_id, "BdSwab", "Pe_Bd"),
-                              bd_swab_id))
+         comments = "",
+         comments = if_else(str_detect(bd_swab_id, "BdSwab"), "Swab stored in RNA shield", comments),
+         comments = if_else(str_detect(bd_swab_id, "DrySwab"), 
+                            "Naming convention yet to be standardized, Non-intuitive convention but correct", comments))
+# 
+# miss_ids <- qpcr_2022 %>% 
+#   select(bd_swab_id) %>% 
+#   filter(str_detect(bd_swab_id, "BdSwab")) %>% 
+#   write_csv(here("clean_tables", "id_joins.csv"))
 
 
 write_csv(qpcr_2022, here("clean_tables", "penn_22-23_bd_results.csv"))

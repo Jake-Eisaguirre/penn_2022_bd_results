@@ -62,7 +62,32 @@ dbExecute(connection, "set search_path to survey_data")
 ## Push results to db
 ```{r}
 
-dbWriteTable(connection, 'penn_22-23_bd_results', `penn_22-23_bd_results`, overwrite=T)
+dbWriteTable(connection, 'penn_22_bd_results', `penn_22-23_bd_results`, overwrite=T)
+
+
+```
+
+
+## Missing_ids
+```{r}
+q <- "select r.region, s.site, v.date, s2.detection_type, c.species_capture,
+c.bd_swab_id, p.bd_swab_id
+from region r
+join site s on r.region_id = s.region_id 
+join visit v on s.site_id = v.site_id 
+join survey s2 on v.visit_id = s2.visit_id 
+join capture c on s2.survey_id = c.survey_id 
+full join penn_22_bd_results p on c.bd_swab_id = p.bd_swab_id
+where r.region = 'pennsylvania'
+and v.date > '2021-12-31'
+and p.bd_swab_id is not null;"
+
+a <- dbGetQuery(connection, q)
+  
+  
+d <- qpcr_2022 %>% 
+  filter(!bd_swab_id %in% a$bd_swab_id) %>% 
+  select(bd_swab_id)
 
 
 ```
