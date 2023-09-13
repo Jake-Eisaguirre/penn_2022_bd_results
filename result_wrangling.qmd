@@ -13,7 +13,7 @@ if(!require(librarian)){
   library(librarian)
 }
 
-shelf(tidyverse, here, janitor, readxl, parsedate, stringr, lubridate)
+shelf(tidyverse, here, janitor, readxl, parsedate, stringr, lubridate, stringi)
 
 ```
 
@@ -85,11 +85,24 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
          comments = "",
          comments = if_else(str_detect(bd_swab_id, "BdSwab"), "Swab stored in RNA shield", comments),
          comments = if_else(str_detect(bd_swab_id, "DrySwab"), 
-                            "Naming convention yet to be standardized, Non-intuitive convention but correct", comments))
-# 
-# miss_ids <- qpcr_2022 %>% 
-#   select(bd_swab_id) %>% 
-#   filter(str_detect(bd_swab_id, "BdSwab")) %>% 
+                            "Naming convention yet to be standardized, Non-intuitive convention but correct", comments)) %>% 
+  mutate(bd_swab_id = str_to_lower(str_replace_all(bd_swab_id, " ", "-")),
+         bd_swab_id = str_replace_all(bd_swab_id, "#", ""),
+         bd_swab_id = str_remove(bd_swab_id, "-(?=\\d+$)"),
+         bd_swab_id = if_else(bd_swab_id == "2022-05-11-admin-toad-sp.19", "2022-05-11-admin-toad19", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "2022-05-12rv-hyve22", "2022-05-12-rv-hyve22", bd_swab_id)) %>% 
+  mutate(bd_swab_id = if_else(bd_swab_id == "bdswab00067", "bdswab000067", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "bdswab00068", "bdswab000068", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "bdswab00069", "bdswab000069", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "bdswab00083", "bdswab000083", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "bdswab00084", "bdswab000084", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "bdswab00085", "bdswab000085", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "2022-04-19-admin-raca9", "2022-05-19-admin-raca9", bd_swab_id))
+
+
+# miss_ids <- qpcr_2022 %>%
+#   select(bd_swab_id) %>%
+#   filter(str_detect(bd_swab_id, "BdSwab")) %>%
 #   write_csv(here("clean_tables", "id_joins.csv"))
 
 
