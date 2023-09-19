@@ -110,6 +110,10 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
          bd_swab_id = if_else(bd_swab_id == "2022-04-19-admin-raca9", "2022-05-19-admin-raca9", bd_swab_id),
          bd_swab_id = if_else(bd_swab_id == "2022-05-18‚äêadmin-rapi16", "2022-05-18-admin-rapi16", bd_swab_id))
 
+update <- str_detect(qpcr_2022$bd_swab_id, "^dry\\d+")
+
+qpcr_2022$bd_swab_id[update] <- str_replace(qpcr_2022$bd_swab_id[update], "^dry", "dryswab")
+
 
 # miss_ids <- qpcr_2022 %>%
 #   select(bd_swab_id) %>%
