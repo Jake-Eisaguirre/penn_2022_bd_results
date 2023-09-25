@@ -108,7 +108,8 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
          bd_swab_id = if_else(bd_swab_id == "bdswab00084", "bdswab000084", bd_swab_id),
          bd_swab_id = if_else(bd_swab_id == "bdswab00085", "bdswab000085", bd_swab_id),
          bd_swab_id = if_else(bd_swab_id == "2022-04-19-admin-raca9", "2022-05-19-admin-raca9", bd_swab_id),
-         bd_swab_id = if_else(bd_swab_id == "2022-05-18‚äêadmin-rapi16", "2022-05-18-admin-rapi16", bd_swab_id)) %>% 
+         bd_swab_id = if_else(bd_swab_id == "2022-05-18‚äêadmin-rapi16", "2022-05-18-admin-rapi16", bd_swab_id),
+         bd_swab_id = if_else(bd_swab_id == "2022-05-12-rv-hyve10", "2022-05-12-rv-hyve18", bd_swab_tube_id)) %>% 
   filter(!bd_swab_id %in% c("neg-3.28.23", "neg-2.21.23", "pos-2.21.23", "pos-3.27.23"))
 
 update <- str_detect(qpcr_2022$bd_swab_id, "^dry\\d+")
