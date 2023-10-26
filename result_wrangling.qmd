@@ -83,7 +83,7 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
          result = if_else(!is.na(average_ct), "p", "n"),
          swab_type = "mw113",
          total_volume_uL = 200,
-         dillution_factor = "1:1",
+         dilution_factor = "1:1",
          volume_template_dna_uL = 5) %>% 
   filter(!str_detect(bd_swab_id, "Pisces Bd/Bsal"),
          !str_detect(bd_swab_id, "Positive"),

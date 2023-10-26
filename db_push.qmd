@@ -57,12 +57,14 @@ tryCatch({
 #search path
 dbExecute(connection, "set search_path to survey_data")
 
+
 ```
 
 ## Push results to db
 ```{r}
 
-dbWriteTable(connection, 'penn_22_bd_results', `penn_22-23_bd_results`, overwrite=T)
+
+dbAppendTable(connection, "qpcr_bd_results", `penn_22-23_bd_results`)
 
 
 ```
