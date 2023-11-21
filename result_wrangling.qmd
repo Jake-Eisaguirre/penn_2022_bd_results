@@ -72,19 +72,23 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
   select(!c(omit, target_name, task, reporter, quencher, well, ct, ct_sd, quantity, quantity_sd, well_position)) %>% 
   rename(bd_swab_id = sample_name,
          average_ct = ct_mean,
-         average_copy_number = quantity_mean) %>% 
+         average_target_quant = quantity_mean) %>% 
   mutate(extract_lab = "rz_lab",
          qpcr_lab = "rz_lab",
-         standard = "pisces",
+         standard = "plasmid-pisces",
          master_mix = "bioline",
          qpcr_machine = "quantstudio_3",
          extraction_kit = "qiagen_dneasy",
          replicate = "singley",
          result = if_else(!is.na(average_ct), "p", "n"),
          swab_type = "mw113",
-         total_volume_uL = 200,
-         dilution_factor = "1:1",
-         volume_template_dna_uL = 5) %>% 
+         total_qpcr_volume_uL = 200,
+         qpcr_dilution_factor = 1,
+         extract_volume_uL = 200,
+         volume_template_dna_uL = 5,
+         average_target_quant = as.numeric(average_target_quant),
+         average_target_quant = if_else(is.na(average_target_quant), 0, average_target_quant),
+         target_quant_per_swab = (average_target_quant * extract_volume_uL) / (volume_template_dna_uL * qpcr_dilution_factor)) %>% 
   filter(!str_detect(bd_swab_id, "Pisces Bd/Bsal"),
          !str_detect(bd_swab_id, "Positive"),
          !str_detect(bd_swab_id, "Negative"),
@@ -108,12 +112,12 @@ qpcr_2022 <- rbind(qPCR_RIBBiTR_Penn2022_28July2023_Plate1_RESULTS.xls, RIBBiTR_
          bd_swab_id = if_else(bd_swab_id == "2022-05-18‚äêadmin-rapi16", "2022-05-18-admin-rapi16", bd_swab_id),
          bd_swab_id = if_else(bd_swab_id == "2022-05-12-rv-hyve10", "2022-05-12-rv-hyve18", bd_swab_id),
          bd_swab_id = if_else(bd_swab_id == "2022-05-19-admin-raca27", "2022-05-19-admin-rapi27", bd_swab_id),
-         average_copy_number= as.numeric(average_copy_number),
-         average_ct = as.numeric(average_ct),
-         average_copy_number = if_else(is.na(average_copy_number), 0, average_copy_number)) %>% 
+         average_target_quant= as.numeric(average_target_quant),
+         average_ct = as.numeric(average_ct)) %>% 
   filter(!bd_swab_id %in% c("neg-3.28.23", "neg-2.21.23", "pos-2.21.23", "pos-3.27.23")) %>% 
   group_by(bd_swab_id) %>% 
-  unique()
+  unique() %>% 
+  mutate(detected = if_else(average_target_quant > 1, "1", "0"))
 
 update <- str_detect(qpcr_2022$bd_swab_id, "^dry\\d+")
 
